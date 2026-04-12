@@ -7,7 +7,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.ForgeHooks;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -26,10 +25,7 @@ public abstract class FarmlandBlockMixin2 extends Block {
             ci.cancel();
             super.fallOn(level, state, pos, entity, fallDistance);
         } else {
-            if (!ForgeHooks.onFarmlandTrample(level, pos, net.minecraft.world.level.block.Blocks.DIRT.defaultBlockState(), fallDistance, entity)) {
-                ci.cancel();
-                super.fallOn(level, state, pos, entity, fallDistance);
-            }
+
         }
     }
 }

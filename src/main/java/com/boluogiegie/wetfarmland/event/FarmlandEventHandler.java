@@ -8,30 +8,27 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.ToolActions;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.level.BlockEvent;
 
-@Mod.EventBusSubscriber
+@EventBusSubscriber
 public class FarmlandEventHandler {
 
     @SubscribeEvent
     public static void onBlockToolModification(BlockEvent.BlockToolModificationEvent event) {
         if (!event.getLevel().isClientSide() && Config.isHardenEnabled()) {
-            if (event.getToolAction() == ToolActions.HOE_TILL) {
-                BlockState finalState = event.getFinalState();
-                if (finalState != null && finalState.getBlock() instanceof FarmBlock) {
-                    ServerLevel level = (ServerLevel) event.getLevel();
-                    BlockPos pos = event.getPos();
-                    FarmlandDataManager dataManager = FarmlandDataManager.getInstance();
-                    dataManager.removeData(pos, level);
-                    long currentDay = level.getDayTime() / 24000L;
-                    FarmlandData data = new FarmlandData(currentDay);
-                    data.wasEverWet = false;
-                    data.updateLastDry(currentDay);
-                    dataManager.setData(pos, level, data);
-                }
+            BlockState finalState = event.getFinalState();
+            if (finalState != null && finalState.getBlock() instanceof FarmBlock) {
+                ServerLevel level = (ServerLevel) event.getLevel();
+                BlockPos pos = event.getPos();
+                FarmlandDataManager dataManager = FarmlandDataManager.getInstance();
+                dataManager.removeData(pos, level);
+                long currentDay = level.getDayTime() / 24000L;
+                FarmlandData data = new FarmlandData(currentDay);
+                data.wasEverWet = false;
+                data.updateLastDry(currentDay);
+                dataManager.setData(pos, level, data);
             }
         }
     }
@@ -41,7 +38,6 @@ public class FarmlandEventHandler {
         if (!event.getLevel().isClientSide()) {
             BlockState placedState = event.getPlacedBlock();
             BlockPos pos = event.getPos();
-
             BlockPos belowPos = pos.below();
             BlockState belowState = event.getLevel().getBlockState(belowPos);
 
@@ -50,12 +46,10 @@ public class FarmlandEventHandler {
                     ServerLevel level = (ServerLevel) event.getLevel();
                     FarmlandDataManager.getInstance().removeData(belowPos, level);
                     try {
-                        Class<?> farmBlockClass = FarmBlock.class;java.lang.reflect.Method turnToDirtMethod = farmBlockClass.getDeclaredMethod("turnToDirt", net.minecraft.world.entity.Entity.class, BlockState.class, net.minecraft.world.level.Level.class, BlockPos.class);
-                        turnToDirtMethod.invoke(null, event.getEntity(), belowState, level, belowPos);
+                        FarmBlock.turnToDirt(null, belowState, level, belowPos);
                     } catch (Exception e) {
                         level.setBlock(belowPos, net.minecraft.world.level.block.Blocks.DIRT.defaultBlockState(), 3);
                     }
-
                 }
             }
 
@@ -70,6 +64,7 @@ public class FarmlandEventHandler {
                     data.wasEverWet = false;
                     data.updateLastDry(currentDay);
                 } else if (moisture == 7) {
+                    // 放置已经湿润的耕地
                     data.wasEverWet = true;
                     data.updateWet(currentDay);
                     data.updateDryStart(currentDay);
@@ -102,11 +97,8 @@ public class FarmlandEventHandler {
                     Block aboveBlock = aboveState.getBlock();
                     if (!(aboveBlock instanceof net.minecraft.world.level.block.FenceGateBlock) && !(aboveBlock instanceof net.minecraft.world.level.block.piston.MovingPistonBlock)) {
                         FarmlandDataManager.getInstance().removeData(pos, level);
-
                         try {
-                            Class<?> farmBlockClass = FarmBlock.class;
-                            java.lang.reflect.Method turnToDirtMethod = farmBlockClass.getDeclaredMethod("turnToDirt", net.minecraft.world.entity.Entity.class, BlockState.class, net.minecraft.world.level.Level.class, BlockPos.class);
-                            turnToDirtMethod.invoke(null, null, state, level, pos);
+                            FarmBlock.turnToDirt(null, state, level, pos);
                         } catch (Exception e) {
                             level.setBlock(pos, net.minecraft.world.level.block.Blocks.DIRT.defaultBlockState(), 3);
                         }

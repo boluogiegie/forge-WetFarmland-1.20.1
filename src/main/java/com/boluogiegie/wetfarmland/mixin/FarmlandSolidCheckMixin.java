@@ -24,6 +24,5 @@ public abstract class FarmlandSolidCheckMixin {
                 return;
             }
         }
-
     }
 }

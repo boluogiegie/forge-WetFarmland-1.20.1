@@ -94,6 +94,7 @@ public class FarmlandDataManager {
             }
         }
     }
+
     public long getCurrentDay(Level level) {
         return level.getDayTime() / 24000L;
     }

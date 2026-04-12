@@ -1,26 +1,26 @@
 package com.boluogiegie.wetfarmland.config;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
 
 public class Config {
     public static final Common COMMON;
-    public static final ForgeConfigSpec SPEC;
+    public static final ModConfigSpec SPEC;
 
     static {
-        final Pair<Common, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(Common::new);
+        final Pair<Common, ModConfigSpec> specPair = new ModConfigSpec.Builder().configure(Common::new);
         COMMON = specPair.getLeft();
         SPEC = specPair.getRight();
     }
 
     public static class Common {
-        public final ForgeConfigSpec.IntValue wetPeriod;
-        public final ForgeConfigSpec.IntValue hardenPeriod;
-        public final ForgeConfigSpec.BooleanValue enableHarden;
-        public final ForgeConfigSpec.BooleanValue enableTrampling;
-        public final ForgeConfigSpec.BooleanValue destroyCropsOnHarden;
+        public final ModConfigSpec.IntValue wetPeriod;
+        public final ModConfigSpec.IntValue hardenPeriod;
+        public final ModConfigSpec.BooleanValue enableHarden;
+        public final ModConfigSpec.BooleanValue enableTrampling;
+        public final ModConfigSpec.BooleanValue destroyCropsOnHarden;
 
-        public Common(ForgeConfigSpec.Builder builder) {
+        public Common(ModConfigSpec.Builder builder) {
             builder.comment("Wet Farmland Configuration")
                     .push("general");
 

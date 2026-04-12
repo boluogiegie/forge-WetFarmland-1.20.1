@@ -39,7 +39,6 @@ public abstract class FarmlandBlockMixin extends Block {
     private void onRandomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random, CallbackInfo ci) {
         if (!level.isClientSide) {
             int currentMoisture = state.getValue(MOISTURE);
-            //当前游戏天数
             long currentDay = level.getDayTime() / 24000L;
             FarmlandDataManager dataManager = FarmlandDataManager.getInstance();
             FarmlandData data = dataManager.getData(pos, level);
@@ -48,7 +47,7 @@ public abstract class FarmlandBlockMixin extends Block {
                 data = new FarmlandData(currentDay);
                 if (currentMoisture == 0) {
                     data.wasEverWet = false;
-                    data.updateLastDry(currentDay);
+                    //data.updateLastDry(currentDay);
                     dataManager.setData(pos, level, data);
                     long daysDry = data.getDaysSinceLastDry(currentDay);
                     if (daysDry >= Config.getHardenPeriod()) {
@@ -86,6 +85,7 @@ public abstract class FarmlandBlockMixin extends Block {
                 ci.cancel();
                 return;
             }
+
             //曾湿润过的耕地
             if (daysSinceWet < Config.getWetPeriod()) {
                 if (currentMoisture < 7) {
@@ -96,8 +96,7 @@ public abstract class FarmlandBlockMixin extends Block {
                 ci.cancel();
                 return;
             }
-
-            // === 湿润期已过，开始干燥 ===
+            //开始干燥
             long daysAfterWetPeriod = daysSinceWet - Config.getWetPeriod();
             int targetMoisture = 6 - (int) daysAfterWetPeriod;
             if (targetMoisture < 0) {
@@ -106,7 +105,7 @@ public abstract class FarmlandBlockMixin extends Block {
             if (currentMoisture != targetMoisture) {
                 level.setBlock(pos, state.setValue(MOISTURE, targetMoisture), 2);
                 currentMoisture = targetMoisture;
-                if (currentMoisture == 6 && data.getDaysSinceLastDry(currentDay) > 0) {
+                if (currentMoisture == 6 && data.getDaysSinceLastDry(currentDay) <= 0) {
                     data.updateLastDry(currentDay);
                 }
             }
@@ -123,7 +122,6 @@ public abstract class FarmlandBlockMixin extends Block {
                     turnToDirt(null, state, level, pos);
                 }
             }
-
             dataManager.setData(pos, level, data);
             ci.cancel();
         }
@@ -131,11 +129,10 @@ public abstract class FarmlandBlockMixin extends Block {
 
     @Unique
     private static void hardenFarmland(ServerLevel level, BlockPos pos, BlockState state) {
-        //上方是否有作物？
         BlockState aboveState = level.getBlockState(pos.above());
         Block aboveBlock = aboveState.getBlock();
 
-        if (aboveBlock instanceof net.minecraft.world.level.block.CropBlock ||  // 小麦胡萝卜土豆
+        if (aboveBlock instanceof net.minecraft.world.level.block.CropBlock ||  // 小麦、胡萝卜、土豆等
                 aboveBlock instanceof net.minecraft.world.level.block.StemBlock ||  // 南瓜/西瓜
                 aboveBlock instanceof net.minecraft.world.level.block.AttachedStemBlock ||
                 aboveBlock instanceof net.minecraft.world.level.block.NetherWartBlock ||
@@ -160,35 +157,42 @@ public abstract class FarmlandBlockMixin extends Block {
                 return true;
             }
         }
-        try {
-            Class<?> farmlandWaterManager = Class.forName("net.minecraftforge.common.FarmlandWaterManager");
-            Object hasBlockWaterTicket = farmlandWaterManager.getMethod("hasBlockWaterTicket", LevelReader.class, BlockPos.class).invoke(null, level, pos);
-            return (boolean) hasBlockWaterTicket;
-        } catch (Exception e) {
-            return false;
+
+        for(BlockPos blockpos : BlockPos.betweenClosed(pos.offset(-4, 0, -4), pos.offset(4, 0, 4))) {
+            if (level.getFluidState(blockpos).is(net.minecraft.tags.FluidTags.WATER)) {
+                return true;
+            }
         }
+
+        return false;
     }
 
     @Inject(method = "turnToDirt", at = @At("HEAD"), cancellable = true)
     private static void onTurnToDirt(@Nullable Entity entity, BlockState state, Level level, BlockPos pos, CallbackInfo ci) {
-        if (!level.isClientSide && level instanceof ServerLevel) {
+        if (!level.isClientSide && level instanceof ServerLevel && Config.isHardenEnabled()) {
             ServerLevel serverLevel = (ServerLevel) level;
             int moisture = 0;
             if (state.getBlock() instanceof FarmBlock) {
                 moisture = state.getValue(MOISTURE);
             }
+
             FarmlandDataManager dataManager = FarmlandDataManager.getInstance();
             FarmlandData data = dataManager.getData(pos, serverLevel);
 
             if (data != null) {
                 long currentDay = serverLevel.getDayTime() / 24000L;
                 long daysDry = data.getDaysSinceLastDry(currentDay);
-                if (daysDry >= Config.getHardenPeriod() && moisture <= 6) {
+
+                boolean isNeverWetAndDryLongEnough = !data.wasEverWet && daysDry >= Config.getHardenPeriod();
+                boolean isDriedLongEnough = data.wasEverWet && moisture <= 6 && daysDry >= Config.getHardenPeriod();
+
+                if (isNeverWetAndDryLongEnough || isDriedLongEnough) {
                     hardenFarmland(serverLevel, pos, state);
                     ci.cancel();
                     return;
                 }
             }
+
             if (Config.isHardenEnabled() && moisture == 0) {
                 BlockState aboveState = level.getBlockState(pos.above());
                 if (aboveState.isAir() || !aboveState.isSolidRender(level, pos.above())) {
@@ -216,16 +220,12 @@ public abstract class FarmlandBlockMixin extends Block {
         if (!cir.getReturnValue()) {
             BlockState aboveState = level.getBlockState(pos.above());
             Block aboveBlock = aboveState.getBlock();
-            try {
-                Class<?> iPlantableClass = Class.forName("net.minecraftforge.common.IPlantable");
-                if (iPlantableClass.isInstance(aboveBlock)) {
 
-                    if (!aboveState.isSolidRender(level, pos.above())) {
-                        cir.setReturnValue(true);
-                        return;
-                    }
+            if (aboveBlock instanceof net.minecraft.world.level.block.CropBlock || aboveBlock instanceof net.minecraft.world.level.block.StemBlock || aboveBlock instanceof net.minecraft.world.level.block.AttachedStemBlock || aboveBlock instanceof net.minecraft.world.level.block.NetherWartBlock || aboveBlock instanceof net.minecraft.world.level.block.CocoaBlock || aboveBlock instanceof net.minecraft.world.level.block.BeetrootBlock || aboveBlock instanceof net.minecraft.world.level.block.SaplingBlock || aboveBlock instanceof net.minecraft.world.level.block.MushroomBlock) {
+                if (!aboveState.isSolidRender(level, pos.above())) {
+                    cir.setReturnValue(true);
+                    return;
                 }
-            } catch (Exception e) {
             }
         }
     }

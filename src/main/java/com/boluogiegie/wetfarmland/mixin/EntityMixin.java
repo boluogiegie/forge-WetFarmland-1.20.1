@@ -23,7 +23,6 @@ public abstract class EntityMixin {
         if (!level.isClientSide && Config.isTramplingPrevented()) {
             Block block = state.getBlock();
             if (block instanceof FarmBlock) {
-
             }
         }
     }
