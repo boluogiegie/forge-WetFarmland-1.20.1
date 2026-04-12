@@ -19,8 +19,7 @@ public abstract class FarmlandSolidCheckMixin {
         if (!aboveState.isAir() && aboveState.isSolidRender(level, pos.above())) {
             Block aboveBlock = aboveState.getBlock();
 
-            if (!(aboveBlock instanceof net.minecraft.world.level.block.FenceGateBlock) &&
-                    !(aboveBlock instanceof net.minecraft.world.level.block.piston.MovingPistonBlock)) {
+            if (!(aboveBlock instanceof net.minecraft.world.level.block.FenceGateBlock) && !(aboveBlock instanceof net.minecraft.world.level.block.piston.MovingPistonBlock)) {
                 cir.setReturnValue(false);
                 return;
             }

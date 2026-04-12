@@ -40,7 +40,6 @@ public class EventHandler {
                     data.wasEverWet = false;
                     data.updateLastDry(currentDay);
                 } else if (moisture == 7) {
-                    // 放置已经湿润的耕地（可能是命令生成的）
                     data.wasEverWet = true;
                     data.updateWet(currentDay);
                     data.updateDryStart(currentDay);

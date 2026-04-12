@@ -1,6 +1,5 @@
 package com.boluogiegie.wetfarmland.data;
 
-import com.boluogiegie.wetfarmland.WetFarmlandMod;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -95,7 +94,6 @@ public class FarmlandDataManager {
             }
         }
     }
-
     public long getCurrentDay(Level level) {
         return level.getDayTime() / 24000L;
     }

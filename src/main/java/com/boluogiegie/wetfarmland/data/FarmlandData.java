@@ -3,12 +3,12 @@ package com.boluogiegie.wetfarmland.data;
 public class FarmlandData {
     public long lastWetDay;      // 上次变湿的游戏天数
     public long dryStartDay;     // 开始干燥的游戏天数
-    public long lastDryDay;      // 开始硬化计时的游戏天数
+    public long lastDryDay;      // 开始硬化的游戏天数
     public boolean wasEverWet;   // 是否曾经湿润过
 
     public FarmlandData(long currentDay) {
         this.lastWetDay = currentDay;
-        this.dryStartDay = currentDay; // 默认从创建时开始
+        this.dryStartDay = currentDay;
         this.lastDryDay = currentDay;
         this.wasEverWet = false;
     }

@@ -39,8 +39,7 @@ public abstract class FarmlandBlockMixin extends Block {
     private void onRandomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random, CallbackInfo ci) {
         if (!level.isClientSide) {
             int currentMoisture = state.getValue(MOISTURE);
-
-            //当前游戏天数（dayTime/24000）
+            //当前游戏天数
             long currentDay = level.getDayTime() / 24000L;
             FarmlandDataManager dataManager = FarmlandDataManager.getInstance();
             FarmlandData data = dataManager.getData(pos, level);
@@ -66,8 +65,6 @@ public abstract class FarmlandBlockMixin extends Block {
             }
             boolean isNearWater = isNearWaterOriginal(level, pos);
             boolean isRaining = level.isRainingAt(pos.above());
-
-            // === 处理湿润逻辑 ===
             if (isNearWater || isRaining) {
                 if (currentMoisture < 7) {
                     level.setBlock(pos, state.setValue(MOISTURE, 7), 2);
@@ -79,7 +76,7 @@ public abstract class FarmlandBlockMixin extends Block {
                 ci.cancel();
                 return;
             }
-            // === 没有水也没有下雨 ===
+            //没有水
             long daysSinceWet = data.getDaysSinceWet(currentDay);
             if (!data.wasEverWet) {
                 long daysDry = data.getDaysSinceLastDry(currentDay);
@@ -89,8 +86,7 @@ public abstract class FarmlandBlockMixin extends Block {
                 ci.cancel();
                 return;
             }
-
-            // === 曾经湿润过的耕地 ===
+            //曾湿润过的耕地
             if (daysSinceWet < Config.getWetPeriod()) {
                 if (currentMoisture < 7) {
                     level.setBlock(pos, state.setValue(MOISTURE, 7), 2);
@@ -135,16 +131,16 @@ public abstract class FarmlandBlockMixin extends Block {
 
     @Unique
     private static void hardenFarmland(ServerLevel level, BlockPos pos, BlockState state) {
-        // 检查上方是否有作物（扩展列表，覆盖更多类型）
+        //上方是否有作物？
         BlockState aboveState = level.getBlockState(pos.above());
         Block aboveBlock = aboveState.getBlock();
 
-        if (aboveBlock instanceof net.minecraft.world.level.block.CropBlock ||  // 小麦、胡萝卜、土豆等
-                aboveBlock instanceof net.minecraft.world.level.block.StemBlock ||  // 南瓜/西瓜茎
+        if (aboveBlock instanceof net.minecraft.world.level.block.CropBlock ||  // 小麦胡萝卜土豆
+                aboveBlock instanceof net.minecraft.world.level.block.StemBlock ||  // 南瓜/西瓜
                 aboveBlock instanceof net.minecraft.world.level.block.AttachedStemBlock ||
                 aboveBlock instanceof net.minecraft.world.level.block.NetherWartBlock ||
                 aboveBlock instanceof net.minecraft.world.level.block.CocoaBlock ||
-                aboveBlock instanceof net.minecraft.world.level.block.BeetrootBlock) {  // 甜菜（如果不是CropBlock子类）
+                aboveBlock instanceof net.minecraft.world.level.block.BeetrootBlock) {  // 甜菜
             level.destroyBlock(pos.above(), false);
         }
         BlockState blockstate = Block.pushEntitiesUp(state, Blocks.DIRT.defaultBlockState(), level, pos);
@@ -166,8 +162,7 @@ public abstract class FarmlandBlockMixin extends Block {
         }
         try {
             Class<?> farmlandWaterManager = Class.forName("net.minecraftforge.common.FarmlandWaterManager");
-            Object hasBlockWaterTicket = farmlandWaterManager.getMethod("hasBlockWaterTicket", LevelReader.class, BlockPos.class)
-                    .invoke(null, level, pos);
+            Object hasBlockWaterTicket = farmlandWaterManager.getMethod("hasBlockWaterTicket", LevelReader.class, BlockPos.class).invoke(null, level, pos);
             return (boolean) hasBlockWaterTicket;
         } catch (Exception e) {
             return false;
@@ -231,7 +226,6 @@ public abstract class FarmlandBlockMixin extends Block {
                     }
                 }
             } catch (Exception e) {
-
             }
         }
     }
