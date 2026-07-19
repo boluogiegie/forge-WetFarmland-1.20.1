@@ -1,39 +1,46 @@
-# Wet Farmland Mod
+# Wet Farmland
+
+**English** | [简体中文](README_zh-CN.md)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Forge](https://img.shields.io/badge/Forge-1.20.1-brightgreen)](https://files.minecraftforge.net/net/minecraftforge/forge/)
 
-一个改变 Minecraft 耕地机制的模组，实现耕地湿润保持、延迟板结和防踩踏功能。
+A lightweight Minecraft mod that changes vanilla farmland mechanics by extending hydration, delaying hardening, and preventing trampling.
 
-## 功能特性
+## Features
 
-- **湿润保持**：耕地湿润后保持指定天数（默认 4 天）才开始干燥
-- **板结机制**：干燥耕地经过指定天数（默认 30 天）后会硬化成泥土
-- **作物销毁**：板结时上方的作物会直接消失，无掉落物（可配置）
-- **防踩踏**：玩家和生物不会踩坏耕地（可配置）
-- **可配置**：所有时间参数和功能开关都可通过配置文件调整
+- **Extended hydration**: Hydrated farmland stays wet for a configurable number of days (4 days by default) before it begins to dry out.
+- **Delayed hardening**: Dry farmland turns back into dirt after a configurable number of days (30 days by default).
+- **Crop removal**: Crops above farmland are removed without drops when the farmland hardens (configurable).
+- **Trampling protection**: Players and mobs cannot trample farmland (configurable).
+- **Configurable behavior**: All time periods and feature toggles can be adjusted in the configuration file.
 
-## 下载
+## Download
 
-[Releases 页面](https://github.com/boluogiegie/wetfarmland/releases)
+[GitHub Releases](https://github.com/boluogiegie/forge-WetFarmland-1.20.1/releases)
 
-## 安装
+## Installation
 
-1. 安装 Minecraft Forge 1.20.1
-2. 将模组 jar 文件放入 `.minecraft/mods/` 文件夹
-3. 启动游戏
+1. Install Minecraft Forge for Minecraft 1.20.1.
+2. Place the mod JAR file in the `.minecraft/mods/` folder.
+3. Launch the game.
 
-## 配置文件
+## Configuration
 
-配置文件位于 `.minecraft/config/wetfarmland.toml`
+The configuration file is located at `.minecraft/config/wetfarmland.toml`.
 
 ```toml
 [general]
-# 耕地保持湿润的天数（默认 4 天）
+# Number of days farmland stays hydrated (default: 4)
 wetPeriod = 4
-# 干燥耕地硬化所需天数（默认 30 天）
+# Number of days before dry farmland hardens into dirt (default: 30)
 hardenPeriod = 30
-# 是否防止踩踏破坏耕地
+# Whether to prevent farmland from being trampled
 enableTrampling = true
-# 硬化时是否销毁上方作物
+# Whether to remove crops above farmland when it hardens
 destroyCropsOnHarden = true
+```
+
+## License
+
+Wet Farmland is licensed under the [MIT License](LICENSE).
