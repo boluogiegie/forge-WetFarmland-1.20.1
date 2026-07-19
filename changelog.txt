@@ -1,0 +1,8 @@
+Wet Farmland 1.0.0 for NeoForge 1.21.1
+=======================================
+
+- Added configurable farmland hydration duration.
+- Added delayed conversion of dry farmland back into dirt.
+- Added optional crop removal when farmland hardens.
+- Added optional trampling protection for players and mobs.
+- Added configuration support through wetfarmland-common.toml.
