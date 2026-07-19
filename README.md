@@ -25,6 +25,12 @@ A lightweight Minecraft mod that changes vanilla farmland mechanics by extending
 2. Place the mod JAR file in the `.minecraft/mods/` folder.
 3. Launch the game.
 
+### Dedicated server
+
+1. Install NeoForge for Minecraft 1.20.1 on the server.
+2. Place the mod JAR file in the server's `mods` folder.
+3. Players can connect without installing the mod on their clients.
+
 ## Configuration
 
 The configuration file is located at `.minecraft/config/wetfarmland.toml`.
